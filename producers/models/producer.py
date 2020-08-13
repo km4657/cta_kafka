@@ -49,6 +49,7 @@ class Producer:
 
         # TODO: Configure the AvroProducer
         schema_registry = CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
+        
         self.producer = AvroProducer({"bootstrap.servers": BROKER_URL},
                 schema_registry=schema_registry)
         # )
