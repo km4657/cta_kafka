@@ -28,14 +28,21 @@ class TransformedStation(faust.Record):
     order: int
     line: str
 
-
 # TODO: Define a Faust Stream that ingests data from the Kafka Connect stations topic and
 #   places it into a new topic with only the necessary information.
+
+def transform_station(station):
+    transform_station.station_id = station.station_id
+    transform_station.station_name = station.station_name
+    transform_station.order = station.order
+    transform_station.line = "red" if station.red else "blue" if station.blue else "green"
+    return transform_station
+
 app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
 # TODO: Define the input Kafka Topic. Hint: What topic did Kafka Connect output to?
-# topic = app.topic("TODO", value_type=Station)
+topic = app.topic("connect-stations", value_type=Station)
 # TODO: Define the output Kafka Topic
-# out_topic = app.topic("TODO", partitions=1)
+out_topic = app.topic("connect-stations.transformed", partitions=1)
 # TODO: Define a Faust Table
 #table = app.Table(
 #    # "TODO",
@@ -43,7 +50,7 @@ app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memor
 #    partitions=1,
 #    changelog_topic=out_topic,
 #)
-
+stations_summary_table = app.Table("stations_summary_table", default=int,partitions=1,changelog_topic=out_topic) 
 
 #
 #
@@ -52,6 +59,16 @@ app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memor
 # then you would set the `line` of the `TransformedStation` record to the string `"red"`
 #
 #
+@app.agent(topic)
+async def transform_station(stations):
+    #
+    # TODO: Add the `add_score` processor to the incoming clickevents
+    #       See: https://faust.readthedocs.io/en/latest/reference/faust.streams.html?highlight=add_processor#faust.streams.Stream.add_processor
+    #
+    stations.add_processor(transform_station)
+    async for st in stations:
+        
+        await out_topic.send(key=st.station_id, value=st)
 
 
 if __name__ == "__main__":

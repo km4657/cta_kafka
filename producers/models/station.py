@@ -64,19 +64,12 @@ class Station(Producer):
             key={"timestamp": self.time_millis()},
             value= {
                 "station_id" : self.station_id,
-                #"station_id" : 3,
                 "train_id" : train.train_id,
-                #"train_id" : "test_train_id",
                 "line" : self.color.name,
-                #"line" : "red",
                 "direction" : direction,
-                #"direction" : "a",
                 "train_status" : train.status.name,
-                #"train_status" : "test_status",
                 "prev_station_id" : prev_station_id,
-                #"prev_station_id" : 3,
                 "prev_direction" : prev_direction
-                #"prev_direction" : "a"
             }
         )
             
