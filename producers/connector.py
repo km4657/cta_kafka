@@ -13,15 +13,18 @@ CONNECTOR_NAME = "stations"
 
 def configure_connector():
     """Starts and configures the Kafka Connect connector"""
-    logging.debug("creating or updating kafka connect connector...")
+    logging.info("creating or updating kafka connect connector...")
+    print(f"creating or updating kafka connect connector...")
 
     rest_method = requests.post
     resp = requests.get(f"{KAFKA_CONNECT_URL}/{CONNECTOR_NAME}")
     if resp.status_code == 200:
-        logging.debug("connector already created skipping recreation")
+        logging.info("connector already created skipping recreation")
+        print(f"connector already created skipping recreation")
         return
 
-    logging.debug("about to create connector")
+    logging.info("about to create connector")
+    print(f"about to create connector")
     resp = rest_method(
         KAFKA_CONNECT_URL,
         headers={"Content-Type": "application/json"},
@@ -42,7 +45,7 @@ def configure_connector():
                     "mode": "incrementing", 
                     "incrementing.column.name": "stop_id",  
                     "topic.prefix": "connect-",
-                    "poll.interval.ms": "500",
+                    "poll.interval.ms": "10000",
                 },
             }
         ),
