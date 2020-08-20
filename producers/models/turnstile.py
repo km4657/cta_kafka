@@ -50,14 +50,16 @@ class Turnstile(Producer):
         num_entries = self.turnstile_hardware.get_entries(timestamp, time_step)
         for entry in range(1,num_entries):
             logger.info("producing turnstile message to kafka")
-            event_time = timestamp
             self.producer.produce(
                 topic=self.topic_name,
-                key=event_time,
+                key={"timestamp": self.time_millis()},
                 value= {
                     "station_id" : self.station.station_id,
                     "station_name" : self.station.station_name,
-                    "line" : self.station.color
+                    "line" : self.station.color.name
                 }
             )
-            event_time = event_time + time_step
+ 
+
+
+           

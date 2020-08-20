@@ -89,7 +89,7 @@ class Producer:
         """Prepares the producer for exit by cleaning up the producer"""
         logger.info("producer close begin")
         self.producer.flush()
-        self.producer.close()
+        #self.producer.close()
         logger.info("producer close complete")
 
     def time_millis(self):

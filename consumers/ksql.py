@@ -22,16 +22,20 @@ KSQL_URL = "http://localhost:8088"
 #       Make sure to set the value format to JSON
 
 KSQL_STATEMENT = """
-CREATE TABLE turnstile (
-    ???
-) WITH (
-    ???
-);
+CREATE TABLE turnstile
+  (station_id INTEGER,
+   station_name VARCHAR,
+   line VARCHAR)
+  WITH (KAFKA_TOPIC='wilson_turnstile_event',
+        VALUE_FORMAT='Avro',
+        KEY='station_id');
+         
 
-CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
+CREATE TABLE turnstile_summary AS
+  SELECT COUNT(station_id) AS count FROM turnstile GROUP BY station_id;
 """
+
+
 
 
 def execute_statement():
@@ -53,8 +57,9 @@ def execute_statement():
     )
 
     # Ensure that a 2XX status code was returned
-    resp.raise_for_status()
-
+    if resp.raise_for_status()==None:
+        logging.info("All is well with KSQL table creation")
+    
 
 if __name__ == "__main__":
     execute_statement()
