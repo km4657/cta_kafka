@@ -9,6 +9,7 @@ from tornado import gen
 
 
 logger = logging.getLogger(__name__)
+BROKER_URL = "PLAINTEXT://localhost:9092"
 
 
 class KafkaConsumer:
@@ -36,18 +37,21 @@ class KafkaConsumer:
         # and use the Host URL for Kafka and Schema Registry!
         #
         #
-        self.broker_properties = {
-                #
-                # TODO
-                #
-        }
+        self.broker_properties = (
+            { 
+                "bootstrap.servers": BROKER_URL,
+                "group.id": "0"
+            }
+        )
 
         # TODO: Create the Consumer, using the appropriate type.
+        #https://docs.confluent.io/current/clients/confluent-kafka-python/index.html?highlight=newtopic#avroconsumer-legacy
         if is_avro is True:
             self.broker_properties["schema.registry.url"] = "http://localhost:8081"
-            #self.consumer = AvroConsumer(...)
+            self.consumer = AvroConsumer(self.broker_properties)
+            
         else:
-            #self.consumer = Consumer(...)
+            self.consumer = Consumer(self.broker_properties)
             pass
 
         #
@@ -56,7 +60,7 @@ class KafkaConsumer:
         # how the `on_assign` callback should be invoked.
         #
         #
-        # self.consumer.subscribe( TODO )
+        self.consumer.subscribe([topic_name_pattern], on_assign=self.on_assign)
 
     def on_assign(self, consumer, partitions):
         """Callback for when topic assignment takes place"""
@@ -64,12 +68,8 @@ class KafkaConsumer:
         # the beginning or earliest
         logger.info("on_assign is incomplete - skipping")
         for partition in partitions:
-            pass
-            #
-            #
-            # TODO
-            #
-            #
+            if self.offset_earliest:
+                partition.offset = confluent_kafka.OFFSET_BEGINNING
 
         logger.info("partitions assigned for %s", self.topic_name_pattern)
         consumer.assign(partitions)
@@ -91,14 +91,28 @@ class KafkaConsumer:
         # is retrieved.
         #
         #
-        logger.info("_consume is incomplete - skipping")
-        return 0
+        while True:
+            message = self.poll(1.0)
+            if message is None:
+                logger.info("no message received by consumer")
+                return 0
+            elif message.error() is not None:
+                logger.info(f"error from consumer {message.error()}")
+                return 0
+            else:
+                try:
+                    logger.info(message.value())
+                except KeyError as e:
+                    logger.info(f"Failed to unpack message {e}")
+                    return 0
+            return 1
+
 
 
     def close(self):
         """Cleans up any open kafka consumers"""
-        #
-        #
-        # TODO: Cleanup the kafka consumer
-        #
-        #
+        logger.info("consumer close begin")
+        if self.consumer is not None:
+            self.consumer.close()
+        logger.info("consumer close complete")
+      

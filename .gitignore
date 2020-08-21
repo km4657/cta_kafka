@@ -9,3 +9,9 @@ producers/models/__pycache__/turnstile.cpython-37.pyc
 producers/models/__pycache__/weather.cpython-37.pyc
 consumers/__pycache__/faust_stream.cpython-37.pyc
 consumers/__pycache__/topic_check.cpython-37.pyc
+consumers/models/__pycache__/__init__.cpython-37.pyc
+consumers/models/__pycache__/line.cpython-37.pyc
+consumers/models/__pycache__/lines.cpython-37.pyc
+consumers/models/__pycache__/station.cpython-37.pyc
+consumers/models/__pycache__/weather.cpython-37.pyc
+consumers/__pycache__/consumer.cpython-37.pyc
