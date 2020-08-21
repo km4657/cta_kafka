@@ -40,7 +40,10 @@ class KafkaConsumer:
         self.broker_properties = (
             { 
                 "bootstrap.servers": BROKER_URL,
-                "group.id": "0"
+                "group.id": "0",
+                'default.topic.config': {
+                    'auto.offset.reset': 'earliest'
+                }
             }
         )
 
@@ -52,7 +55,7 @@ class KafkaConsumer:
             
         else:
             self.consumer = Consumer(self.broker_properties)
-            pass
+
 
         #
         #
@@ -60,13 +63,13 @@ class KafkaConsumer:
         # how the `on_assign` callback should be invoked.
         #
         #
-        self.consumer.subscribe([topic_name_pattern], on_assign=self.on_assign)
+        self.consumer.subscribe([self.topic_name_pattern], on_assign=self.on_assign)
+
 
     def on_assign(self, consumer, partitions):
         """Callback for when topic assignment takes place"""
         # TODO: If the topic is configured to use `offset_earliest` set the partition offset to
         # the beginning or earliest
-        logger.info("on_assign is incomplete - skipping")
         for partition in partitions:
             if self.offset_earliest:
                 partition.offset = confluent_kafka.OFFSET_BEGINNING
@@ -92,7 +95,11 @@ class KafkaConsumer:
         #
         #
         while True:
-            message = self.poll(1.0)
+            try:
+                message = self.consumer.poll(self.consume_timeout)
+            except Exception as e:
+                logger.error(f"Exception when polling {e}")
+                return 0
             if message is None:
                 logger.info("no message received by consumer")
                 return 0
@@ -101,11 +108,13 @@ class KafkaConsumer:
                 return 0
             else:
                 try:
-                    logger.info(message.value())
-                except KeyError as e:
-                    logger.info(f"Failed to unpack message {e}")
+                    logger.info("Message received by consumer")
+                    self.message_handler(message)
+                    return 1
+                except Exception as e:
+                    logger.error(f"Exception in message_handler {e}")
                     return 0
-            return 1
+           
 
 
 
