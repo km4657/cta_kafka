@@ -88,6 +88,7 @@ class Producer:
     def close(self):
         """Prepares the producer for exit by cleaning up the producer"""
         logger.info("producer close begin")
+        #https://knowledge.udacity.com/questions/74248
         if self.producer is not None:
             self.producer.flush()
         logger.info("producer close complete")

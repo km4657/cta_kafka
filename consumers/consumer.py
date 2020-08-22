@@ -93,6 +93,7 @@ class KafkaConsumer:
         # Additionally, make sure you return 1 when a message is processed, and 0 when no message
         # is retrieved.
         #
+        # assistance from https://knowledge.udacity.com/questions/305307
         #
         while True:
             try:
