@@ -61,6 +61,7 @@ class KafkaConsumer:
         #
         # TODO: Configure the AvroConsumer and subscribe to the topics. Make sure to think about
         # how the `on_assign` callback should be invoked.
+        # assistance from https://knowledge.udacity.com/questions/305307
         #
         #
         self.consumer.subscribe([self.topic_name_pattern], on_assign=self.on_assign)
