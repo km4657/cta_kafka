@@ -26,7 +26,7 @@ CREATE TABLE turnstile
   (station_id INTEGER,
    station_name VARCHAR,
    line VARCHAR)
-  WITH (KAFKA_TOPIC='wilson_turnstile_event',
+  WITH (KAFKA_TOPIC='turnstile_event',
         VALUE_FORMAT='Avro',
         KEY='station_id');
          

@@ -21,8 +21,17 @@ class Lines:
         """Processes a station message"""
         if "_arrival_events" in message.topic():
             value = message.value()
-            if message.topic() == "connect-stations.transformed":
-                value = json.loads(value)
+            if value["line"] == "green":
+                self.green_line.process_message(message)
+            elif value["line"] == "red":
+                self.red_line.process_message(message)
+            elif value["line"] == "blue":
+                self.blue_line.process_message(message)
+            else:
+                logger.debug("discarding unknown line msg %s", value["line"])
+        elif "connect-stations.transformed" in message.topic():
+            value = message.value()
+            value = json.loads(value)
             if value["line"] == "green":
                 self.green_line.process_message(message)
             elif value["line"] == "red":
